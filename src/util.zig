@@ -10,11 +10,10 @@ var gpa_impl = std.heap.GeneralPurposeAllocator(.{}){};
 pub const gpa = &gpa_impl.allocator;
 
 pub fn parseIntArray(in: []const u8) !std.ArrayList(i32) {
-    var it = split(u8, in, "\r\n");
+    var it = tokenize(u8, in, "\r\n");
     var list = List(i32).init(gpa);
 
-    while (true)
-    {
+    while (true) {
         const next = it.next();
         if (next == null) {
             break;
