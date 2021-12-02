@@ -9,8 +9,23 @@ const Str = []const u8;
 var gpa_impl = std.heap.GeneralPurposeAllocator(.{}){};
 pub const gpa = &gpa_impl.allocator;
 
-// Add utility functions here
+pub fn parseIntArray(in: []const u8) !std.ArrayList(i32) {
+    var it = split(u8, in, "\r\n");
+    var list = List(i32).init(gpa);
 
+    while (true)
+    {
+        const next = it.next();
+        if (next == null) {
+            break;
+        }
+
+        const val = try parseInt(i32, next.?, 10);
+        try list.append(val);
+    }
+
+    return list;
+}
 
 // Useful stdlib functions
 const tokenize = std.mem.tokenize;
