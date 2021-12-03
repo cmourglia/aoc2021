@@ -26,6 +26,56 @@ pub fn parseIntArray(in: []const u8) !std.ArrayList(i32) {
     return list;
 }
 
+pub fn getBin(str: Str) !BitSet {
+    var bin = try BitSet.initEmpty(str.len, gpa);
+
+    for (str) |c, i| {
+        if (c == '1') {
+            bin.set(i);
+        }
+    }
+
+    return bin;
+}
+
+pub fn parseBinaries(in_data: []const u8) !List(BitSet) {
+    var it = tokenize(u8, in_data, "\n\r");
+
+    var bins = List(BitSet).init(gpa);
+
+    // Parse bins
+    while (true) {
+        var next = it.next();
+        if (next == null) {
+            break;
+        }
+
+        const bin = try getBin(next.?);
+        try bins.append(bin);
+    }
+
+    return bins;
+}
+
+pub fn binToDecimal(bin: *BitSet) usize {
+    var value: usize = 0;
+    var mult: usize = 1;
+
+    var i: usize = bin.unmanaged.bit_length - 1;
+    while (true) : (i -= 1) {
+        if (bin.isSet(i)) {
+            value += mult;
+        }
+        mult *= 2;
+
+        if (i == 0) {
+            break;
+        }
+    }
+
+    return value;
+}
+
 // Useful stdlib functions
 const tokenize = std.mem.tokenize;
 const split = std.mem.split;
