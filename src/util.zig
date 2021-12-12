@@ -7,7 +7,7 @@ const BitSet = std.DynamicBitSet;
 const Str = []const u8;
 
 var gpa_impl = std.heap.GeneralPurposeAllocator(.{}){};
-pub const gpa = &gpa_impl.allocator;
+pub const gpa = gpa_impl.allocator();
 
 pub fn parseIntArray(in: []const u8) !std.ArrayList(i32) {
     var it = tokenize(u8, in, "\r\n");
