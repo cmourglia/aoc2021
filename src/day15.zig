@@ -38,54 +38,50 @@ pub fn main() !void {
     grid = expandMap(initial_grid.items[0..], &width, &height, 5);
 
     // Dijkstra
-    var distances_array = try List(usize).initCapacity(gpa, grid.items.len);
-    try distances_array.resize(grid.items.len);
+    var visited = Set.init(gpa);
 
-    var visitable = Set.init(gpa);
+    var queue = std.PriorityQueue([2]usize, lessThan).init(gpa);
+    try queue.add([2]usize{ 0, 0 });
 
-    for (distances_array.items) |_, i| {
-        try visitable.put(i, {});
-    }
+    while (queue.count() > 0) {
+        var nextv = queue.remove();
+        var next = nextv[0];
+        var cost = nextv[1];
 
-    // Work on the slice
-    var distances = distances_array.items;
-    std.mem.set(usize, distances, std.math.maxInt(usize));
-    // Distance for a to a is 0
-    distances[0] = 0;
+        if (visited.contains(next)) continue;
+        try visited.put(next, {});
 
-    while (visitable.count() > 0) {
-        var next = nextToVisit(distances, visitable);
-
+        if (next == (width * height - 1)) {
+            print("{}\n", .{cost});
+            break;
+        }
         var buffer = [_]usize{0} ** 4;
         var neighbors = util.getNeighborIndices(next, width, height, buffer[0..]);
 
-        var this_cost = distances[next];
         for (neighbors) |idx| {
             var neighbor_cost = grid.items[idx];
-            if (neighbor_cost + this_cost < distances[idx]) {
-                distances[idx] = neighbor_cost + this_cost;
-            }
+            try queue.add([2]usize{ idx, cost + neighbor_cost });
         }
-
-        _ = visitable.remove(next);
     }
-
-    print("{}\n", .{distances[distances.len - 1]});
 }
 
-fn nextToVisit(distances: []usize, visitable: Map(usize, void)) usize {
+fn nextToVisit(distances: []usize, visitable: Set, visited: Set) usize {
     var minv: usize = std.math.maxInt(usize);
     var mini: usize = 0;
 
     var it = visitable.keyIterator();
     while (it.next()) |i| {
-        if (minv > distances[i.*]) {
+        if (!visited.contains(i.*) and minv > distances[i.*]) {
             mini = i.*;
             minv = distances[i.*];
         }
     }
 
     return mini;
+}
+
+fn lessThan(a: [2]usize, b: [2]usize) std.math.Order {
+    return std.math.order(a[1], b[1]);
 }
 
 fn expandMap(initial_grid: []u8, w: *usize, h: *usize, mult: usize) List(u8) {
