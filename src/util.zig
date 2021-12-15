@@ -76,6 +76,41 @@ pub fn binToDecimal(bin: *BitSet) usize {
     return value;
 }
 
+/// out must be at least 4 elements wide
+pub fn getNeighborIndices(i: usize, w: usize, h: usize, buffer: []usize) []usize {
+    var x = @mod(i, w);
+    var y = @divFloor(i, w);
+
+    var out = buffer;
+
+    var it: usize = 0;
+    if (x > 0) {
+        out[it] = (x - 1) + y * w;
+        it += 1;
+    }
+    if (x < w - 1) {
+        out[it] = (x + 1) + y * w;
+        it += 1;
+    }
+
+    if (y > 0) {
+        out[it] = x + (y - 1) * w;
+        it += 1;
+    }
+    if (y < h - 1) {
+        out[it] = x + (y + 1) * w;
+        it += 1;
+    }
+
+    out.len = it;
+
+    return out;
+}
+
+pub fn range(len: usize) []const u0 {
+    return @as([*]u0, undefined)[0..len];
+}
+
 // Useful stdlib functions
 const tokenize = std.mem.tokenize;
 const split = std.mem.split;
